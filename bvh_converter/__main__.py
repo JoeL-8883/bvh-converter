@@ -23,6 +23,22 @@ def open_csv(filename, mode='r'):
     else:
         return io.open(filename, mode=mode, newline='')
     
+def process_folder(other_s, file_in):
+    print("Analyzing frames...")
+    for i in range(other_s.frames):
+        new_frame = process_bvhkeyframe(other_s.keyframes[i], other_s.root,
+                                        other_s.dt * i)
+    print("done")
+    
+    file_out = file_in[:-4] + "_worldpos.csv"
+
+    with open_csv(file_out, 'w') as f:
+        writer = csv.writer(f)
+        header, frames = other_s.get_frames_worldpos()
+        writer.writerow(header)
+        for frame in frames:
+            writer.writerow(frame)
+    print("World Positions Output file: {}".format(file_out))
 
 def main():
     parser = argparse.ArgumentParser(
@@ -33,32 +49,24 @@ def main():
     args = parser.parse_args()
 
     file_in = args.filename
-    folder = args.foldername
+    folder_in = args.foldername
     do_rotations = args.rotation
 
-    if folder:
-        if not os.path.exists(folder):
-            print("Error: folder {} not found.".format(folder))
+    if folder_in:
+        if not os.path.exists(folder_in):
+            print("Error: folder {} not found.".format(folder_in))
             sys.exit(0)
-        file_in = folder
-    elif not os.path.exists(file_in):
-        print("Error: file {} not found.".format(file_in))
-        sys.exit(0)
-    
-    if folder:
-        print("Output folder: {}".format(folder))
-        
-        # Iterate through each BvH file
-        for bvh in os.listdir(folder):
-            if bvh.endswith(".bvh"):
-                
-                # Get the directory of the file
-                directory = os.path.join(folder, bvh)
-                
 
+        print("Output folder: {}".format(folder_in))
+        for bvh in os.listdir(folder_in):
+            bvh_dir = os.path.join(folder_in, bvh)
+            other_s = process_bvhfile(bvh_dir)
     else:
-        print("Input filename: {}".format(file_in))
-        other_s = process_bvhfile(file_in)
+        if not os.path.exists(file_in):
+            print("Error: file {} not found.".format(file_in))
+            sys.exit(0)
+        print("Output file: {}".format(file_in))
+        
 
     print("Analyzing frames...")
     for i in range(other_s.frames):
