@@ -25,7 +25,48 @@ def open_csv(filename, mode='r'):
     else:
         return io.open(filename, mode=mode, newline='')
     
+<<<<<<< HEAD
 def process(other_s, file_in):
+=======
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Extract joint location and optionally rotation data from BVH file format.")
+    parser.add_argument("-i", "--filename", type=str, help='BVH file for conversion.')
+    parser.add_argument("-f", "--foldername", type=str, help='Folder to output CSV files to.')
+    parser.add_argument("-r", "--rotation", action='store_true', help='Write rotations to CSV as well.')
+    args = parser.parse_args()
+
+    file_in = args.filename
+    folder = args.foldername
+    do_rotations = args.rotation
+
+    if folder:
+        if not os.path.exists(folder):
+            print("Error: folder {} not found.".format(folder))
+            sys.exit(0)
+        file_in = folder
+    elif not os.path.exists(file_in):
+        print("Error: file {} not found.".format(file_in))
+        sys.exit(0)
+    
+    if folder:
+        print("Output folder: {}".format(folder))
+        
+        # Iterate through each BvH file
+        for bvh in os.listdir(folder):
+            if bvh.endswith(".bvh"):
+                
+                # Get the directory of the file
+                directory = os.path.join(folder, bvh)
+                
+
+    else:
+        print("Input filename: {}".format(file_in))
+        other_s = process_bvhfile(file_in)
+
+    print("Analyzing frames...")
+>>>>>>> 70cbc0ab253499600250fdaad43b7ff4ec855c31
     for i in range(other_s.frames):
         new_frame = process_bvhkeyframe(other_s.keyframes[i], other_s.root,
                                         other_s.dt * i)
