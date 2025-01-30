@@ -45,8 +45,8 @@ def process(other_s, file_in):
 def main():
     parser = argparse.ArgumentParser(
         description="Extract joint location and optionally rotation data from BVH file format.")
-    parser.add_argument("-i", "--filename", type=str, help='BVH file for conversion.')
-    parser.add_argument("-f", "--foldername", type=str, help='Folder to output CSV files to.')
+    parser.add_argument("-f", "--filename", type=str, help='BVH file for conversion.')
+    parser.add_argument("-d", "--foldername", type=str, help='Folder to output CSV files to.')
     parser.add_argument("-r", "--rotation", action='store_true', help='Write rotations to CSV as well.')
     args = parser.parse_args()
 
@@ -81,7 +81,6 @@ def main():
         print(f"{len(corrupted)} Corrupted files")
         print(f"{counter} Files converted")
         print(corrupted)
-    
     else:
         if not os.path.exists(file_in):
             print("Error: file {} not found.".format(file_in))
