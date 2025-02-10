@@ -25,17 +25,14 @@ def open_csv(filename, mode='r'):
     else:
         return io.open(filename, mode=mode, newline='')
     
-def process(other_s, file_in):
+def process(other_s, file_in, output_dir):
     for i in range(other_s.frames):
         new_frame = process_bvhkeyframe(other_s.keyframes[i], other_s.root,
                                         other_s.dt * i)
-    
-    # Create an output folder if there isn't one
-    if not os.path.exists("output"):
-        os.makedirs("output")
-    
-    file_out = "output/" + file_in.split("/")[-1][:-4] + ".csv"
-    with open_csv(file_out, 'w') as f:
+
+    file_out = file_in.split("/")[-1][:-4] + ".csv" # Get only the filename
+    output_dir = os.path.join(output_dir, file_out)
+    with open_csv(output_dir, 'w') as f:
         writer = csv.writer(f)
         header, frames = other_s.get_frames_worldpos()
         writer.writerow(header)
@@ -46,9 +43,15 @@ def main():
     parser = argparse.ArgumentParser(
         description="Extract joint location and optionally rotation data from BVH file format.")
     parser.add_argument("-f", "--filename", type=str, help='BVH file for conversion.')
-    parser.add_argument("-d", "--foldername", type=str, help='Folder to output CSV files to.')
+    parser.add_argument("-d", "--foldername", type=str, help='Folder of BvH files to convert')
     parser.add_argument("-r", "--rotation", action='store_true', help='Write rotations to CSV as well.')
     args = parser.parse_args()
+    parent_dir = os.path.join(os.getcwd(), os.pardir)
+    grandparent_dir = os.path.join(parent_dir, os.pardir)
+    output_dir = os.path.join(grandparent_dir, 'output', 'csv')
+
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
 
     file_in = args.filename
     folder_in = args.foldername
@@ -59,13 +62,12 @@ def main():
             print("Error: folder {} not found.".format(folder_in))
             sys.exit(0)
 
-        print("Output folder: {}".format(folder_in))
         counter = 0
         for bvh in os.listdir(folder_in):
             bvh_dir = os.path.join(folder_in, bvh)
             try: 
                 other_s = process_bvhfile(bvh_dir)
-                process(other_s, bvh_dir)
+                process(other_s, bvh_dir, output_dir)
                 print(bvh_dir)
                 counter += 1
             # Deleted corrupted(?) files
@@ -88,7 +90,7 @@ def main():
         print("Output file: {}".format(file_in))
         
         other_s = process_bvhfile(file_in)
-        process(other_s, file_in)
+        process(other_s, file_in, output_dir)
 
     
 if __name__ == "__main__":
